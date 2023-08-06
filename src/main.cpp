@@ -1,4 +1,6 @@
 #include <SDL.h>
+#include <cstdlib> 
+#include <iostream>
 
 const int BOX_WIDTH = 50;
 const int BOX_HEIGHT = 50;
@@ -9,8 +11,9 @@ const float BOX_SPEED = 80.0f;
 struct Box {
     float x, y;
     float dx, dy;
+    SDL_Color color;
 
-    Box() : x(WINDOW_WIDTH / 2 - BOX_WIDTH / 2), y(WINDOW_HEIGHT / 2 - BOX_HEIGHT / 2), dx(BOX_SPEED), dy(BOX_SPEED) {}
+    Box() : x(WINDOW_WIDTH / 2 - BOX_WIDTH / 2), y(WINDOW_HEIGHT / 2 - BOX_HEIGHT / 2), dx(BOX_SPEED), dy(BOX_SPEED), color{0, 0, 255, 255} {}
 
     void moveAndBounce(float deltaTime) {
         x += dx * deltaTime;
@@ -34,7 +37,19 @@ void update(float deltaTime) {
 
 // Function to handle input
 void input(SDL_Event& event) {
-    // Existing input handling code...
+    if (event.type == SDL_MOUSEBUTTONDOWN) {
+        int mouseX, mouseY;
+        SDL_GetMouseState(&mouseX, &mouseY);
+        if (mouseX >= box.x && mouseX <= box.x + BOX_WIDTH && mouseY >= box.y && mouseY <= box.y + BOX_HEIGHT) {
+            // Change the color of the box to a random color
+            box.color.r = rand() % 256;
+            box.color.g = rand() % 256;
+            box.color.b = rand() % 256;
+
+            // Log a message to standard output
+            std::cout << "Box was clicked!" << std::endl;
+        }
+    }
 }
 
 // Function to draw to the screen
@@ -45,7 +60,7 @@ void draw(SDL_Window* window) {
 
     // Draw the box
     SDL_Rect rect = { static_cast<int>(box.x), static_cast<int>(box.y), BOX_WIDTH, BOX_HEIGHT };
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // Blue box
+    SDL_SetRenderDrawColor(renderer, box.color.r, box.color.g, box.color.b, 255);
     SDL_RenderFillRect(renderer, &rect);
 
     SDL_RenderPresent(renderer);

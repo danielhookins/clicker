@@ -1,0 +1,6 @@
+# Library files
+lib/*
+!lib/README.md
+
+# Build dir files
+build/*

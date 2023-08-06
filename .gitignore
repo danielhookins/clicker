@@ -4,3 +4,6 @@ lib/*
 
 # Build dir files
 build/*
+
+# VS Code
+.vscode

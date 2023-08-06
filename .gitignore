@@ -5,5 +5,8 @@ lib/*
 # Build dir files
 build/*
 
+# Release dir files
+release/*
+
 # VS Code
 .vscode

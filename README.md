@@ -1,6 +1,6 @@
 # Clicker
 
-A clicker written in C++ using the SDL2 library.
+A clicker game written in C++ using the SDL2 library.
 
 ## Project structure
 

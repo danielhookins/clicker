@@ -23,7 +23,11 @@ set(SDL2_TTF_DLL "${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL2_ttf/lib/x64/SDL2_ttf.dll"
 
 include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR})
 
-add_executable(Clicker src/main.cpp)
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    add_executable(Clicker WIN32 src/main.cpp)
+else()
+    add_executable(Clicker src/main.cpp)
+endif()
 
 target_link_libraries(Clicker ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARY} ${SDL2_TTF_LIBRARY} ${SDL2_MAIN_LIBRARY})
 

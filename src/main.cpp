@@ -13,6 +13,9 @@ constexpr int WINDOW_WIDTH = 800;
 constexpr int WINDOW_HEIGHT = 600;
 constexpr float BOX_SPEED = 80.0f;
 
+const int TOTAL_CLICKS = 100; // You can change this value as needed
+int progressPercentage = 0;
+
 /**
  * The main Game class that encapsulates game logic, input handling, and rendering.
  */
@@ -95,6 +98,14 @@ public:
                 box.color.g = dist(mt);
                 box.color.b = dist(mt);
                 score++;
+                
+                if (progressPercentage < 100) {
+                    progressPercentage = (score * 100) / TOTAL_CLICKS;
+                }
+
+                if (progressPercentage >= 100) {
+                    std::cout << "You've reached 100%!" << std::endl;
+                }
             }
         }
     }
@@ -122,6 +133,16 @@ public:
         SDL_Rect textRect = { WINDOW_WIDTH - textWidth - 10, 10, textWidth, textHeight };
         SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
         SDL_DestroyTexture(textTexture);
+
+        // Render the progress bar background
+        SDL_Rect progressBarBackground = { 10, WINDOW_HEIGHT - 30, WINDOW_WIDTH - 20, 20 };
+        SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+        SDL_RenderFillRect(renderer, &progressBarBackground);
+
+        // Render the progress bar fill
+        SDL_Rect progressBarFill = { 10, WINDOW_HEIGHT - 30, (WINDOW_WIDTH - 20) * progressPercentage / 100, 20 };
+        SDL_SetRenderDrawColor(renderer, 0, 150, 0, 255);
+        SDL_RenderFillRect(renderer, &progressBarFill);
 
         SDL_RenderPresent(renderer);  // Present the rendered frame
     }

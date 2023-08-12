@@ -13,7 +13,8 @@ constexpr int WINDOW_WIDTH = 800;
 constexpr int WINDOW_HEIGHT = 600;
 constexpr float BOX_SPEED = 80.0f;
 
-const int TOTAL_CLICKS = 100; // You can change this value as needed
+// Progress Bar
+const int TOTAL_CLICKS = 100;
 int progressPercentage = 0;
 
 /**
@@ -32,6 +33,9 @@ private:
         float x, y;  // Position of the box
         float dx, dy;  // Movement direction and speed
         SDL_Color color;  // Color of the box
+        float shakeTime = 0.0f;  // Time left for shaking
+        const float SHAKE_DURATION = 0.1f;  // Duration of the shake in seconds
+        const float SHAKE_INTENSITY = 5.0f;  // Intensity of the shake in pixels
 
         // Constructor initializes the box in the center of the window
         Box() : x(WINDOW_WIDTH / 2 - BOX_WIDTH / 2), y(WINDOW_HEIGHT / 2 - BOX_HEIGHT / 2), dx(BOX_SPEED), dy(BOX_SPEED), color{0, 0, 255, 255} {}
@@ -43,6 +47,15 @@ private:
         void moveAndBounce(float deltaTime) {
             x += dx * deltaTime;
             y += dy * deltaTime;
+
+            if (shakeTime > 0.0f) {
+                std::random_device rd;
+                std::mt19937 mt(rd());
+                std::uniform_real_distribution<float> dist(-SHAKE_INTENSITY, SHAKE_INTENSITY);
+                x += dist(mt);
+                y += dist(mt);
+                shakeTime -= deltaTime;
+            }
 
             if (x <= 0 || x + BOX_WIDTH >= WINDOW_WIDTH) {
                 dx = -dx;
@@ -97,12 +110,17 @@ public:
                 box.color.r = dist(mt);
                 box.color.g = dist(mt);
                 box.color.b = dist(mt);
+                
+                // Give the box a shake effect
+                box.shakeTime = box.SHAKE_DURATION;
+
+                // Increase the score
                 score++;
                 
+                // Update the progress bar
                 if (progressPercentage < 100) {
                     progressPercentage = (score * 100) / TOTAL_CLICKS;
                 }
-
                 if (progressPercentage >= 100) {
                     std::cout << "You've reached 100%!" << std::endl;
                 }

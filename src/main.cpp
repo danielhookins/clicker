@@ -16,6 +16,8 @@ constexpr float BOX_SPEED = 80.0f;
 // Progress Bar
 const int TOTAL_CLICKS = 100;
 int progressPercentage = 0;
+constexpr int PROGRESS_BAR_HEIGHT = 10;  // Height of the progress bar
+constexpr int PROGRESS_BAR_OFFSET = 10;  // Offset from the box
 
 /**
  * The main Game class that encapsulates game logic, input handling, and rendering.
@@ -60,7 +62,7 @@ private:
             if (x <= 0 || x + BOX_WIDTH >= WINDOW_WIDTH) {
                 dx = -dx;
             }
-            if (y <= 0 || y + BOX_HEIGHT >= WINDOW_HEIGHT) {
+            if (y <= (0 + PROGRESS_BAR_HEIGHT + PROGRESS_BAR_OFFSET) || y + BOX_HEIGHT >= WINDOW_HEIGHT) {
                 dy = -dy;
             }
         }
@@ -132,8 +134,21 @@ public:
      * Renders the game state to the window.
      */
     void draw() {
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // Set background color
-        SDL_RenderClear(renderer);  // Clear the renderer
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderClear(renderer);
+
+        // Show progress bar only if it's not 100%
+        if (progressPercentage < 100 && progressPercentage > 0) {
+            // Render the progress bar background
+            SDL_Rect progressBarBackground = { static_cast<int>(box.x), static_cast<int>(box.y) - PROGRESS_BAR_HEIGHT - PROGRESS_BAR_OFFSET, BOX_WIDTH, PROGRESS_BAR_HEIGHT };
+            SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+            SDL_RenderFillRect(renderer, &progressBarBackground);
+
+            // Render the progress bar fill
+            SDL_Rect progressBarFill = { static_cast<int>(box.x), static_cast<int>(box.y) - PROGRESS_BAR_HEIGHT - PROGRESS_BAR_OFFSET, BOX_WIDTH * progressPercentage / 100, PROGRESS_BAR_HEIGHT };
+            SDL_SetRenderDrawColor(renderer, 0, 150, 0, 255);
+            SDL_RenderFillRect(renderer, &progressBarFill);
+        }
 
         // Render the box
         SDL_Rect rect = { static_cast<int>(box.x), static_cast<int>(box.y), BOX_WIDTH, BOX_HEIGHT };
@@ -151,16 +166,6 @@ public:
         SDL_Rect textRect = { WINDOW_WIDTH - textWidth - 10, 10, textWidth, textHeight };
         SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
         SDL_DestroyTexture(textTexture);
-
-        // Render the progress bar background
-        SDL_Rect progressBarBackground = { 10, WINDOW_HEIGHT - 30, WINDOW_WIDTH - 20, 20 };
-        SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
-        SDL_RenderFillRect(renderer, &progressBarBackground);
-
-        // Render the progress bar fill
-        SDL_Rect progressBarFill = { 10, WINDOW_HEIGHT - 30, (WINDOW_WIDTH - 20) * progressPercentage / 100, 20 };
-        SDL_SetRenderDrawColor(renderer, 0, 150, 0, 255);
-        SDL_RenderFillRect(renderer, &progressBarFill);
 
         SDL_RenderPresent(renderer);  // Present the rendered frame
     }

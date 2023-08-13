@@ -89,6 +89,19 @@ private:
     
     std::vector<Box> boxes;  // Vector of boxes
 
+    struct Particle {
+        float x, y;  // Position
+        float dx, dy;  // Velocity
+        float lifespan;  // Time left before the particle disappears
+        SDL_Color color;  // Color of the particle
+    };
+
+    std::vector<Particle> particles;
+    static constexpr int NUM_PARTICLES = 40;  // Number of particles to spawn on a click
+    static constexpr float PARTICLE_LIFESPAN = 2.0f;  // Lifespan of a particle in seconds
+    static constexpr float PARTICLE_SPEED = 150.0f;  // Speed of the particles
+
+
 public:
     /**
      * Constructor initializes the game with the given renderer.
@@ -119,6 +132,15 @@ public:
         for (auto& box : boxes) {
             box.moveAndBounce(deltaTime);
         }
+
+        for (auto& particle : particles) {
+            particle.x += particle.dx * deltaTime;
+            particle.y += particle.dy * deltaTime;
+            particle.lifespan -= deltaTime;
+        }
+        particles.erase(std::remove_if(particles.begin(), particles.end(), [](const Particle& p) {
+            return p.lifespan <= 0.0f;
+        }), particles.end());
     }
 
     /**
@@ -131,6 +153,9 @@ public:
             SDL_GetMouseState(&mouseX, &mouseY);
             for (auto& box : boxes) {
                 if (mouseX >= box.x && mouseX <= box.x + BOX_WIDTH && mouseY >= box.y && mouseY <= box.y + BOX_HEIGHT) {
+                    // Calculate the angle of the box's movement and reverse it
+                    float boxAngle = atan2(box.dy, box.dx) + M_PI;  // Adding M_PI to reverse the direction
+                    
                     std::random_device rd;
                     std::mt19937 mt(rd());
                     std::uniform_int_distribution<int> dist(0, 255);
@@ -138,6 +163,23 @@ public:
                     box.color.g = dist(mt);
                     box.color.b = dist(mt);
                     
+                    // Spawn particles
+                    for (int i = 0; i < NUM_PARTICLES; ++i) {
+                        Particle p;
+                        p.x = box.x + BOX_WIDTH / 2;
+                        p.y = box.y + BOX_HEIGHT / 2;
+
+                        // Adjust the angle based on the box's movement direction
+                        float randomOffset = (static_cast<float>(rand()) / RAND_MAX - 0.5f) * M_PI / 4;  // Random offset between -45 to +45 degrees
+                        float angle = boxAngle + randomOffset;
+
+                        p.dx = cos(angle) * PARTICLE_SPEED;
+                        p.dy = sin(angle) * PARTICLE_SPEED;
+                        p.lifespan = PARTICLE_LIFESPAN;
+                        p.color = box.color;
+                        particles.push_back(p);
+                    }
+
                     // Give the box a shake effect
                     box.shakeTime = box.SHAKE_DURATION;
 
@@ -186,6 +228,13 @@ public:
             // Render the box
             SDL_Rect rect = { static_cast<int>(box.x), static_cast<int>(box.y), BOX_WIDTH, BOX_HEIGHT };
             SDL_SetRenderDrawColor(renderer, box.color.r, box.color.g, box.color.b, 255);
+            SDL_RenderFillRect(renderer, &rect);
+        }
+
+        // Render Particles
+        for (const auto& particle : particles) {
+            SDL_Rect rect = { static_cast<int>(particle.x), static_cast<int>(particle.y), 2, 2 };  // 2x2 pixel particle
+            SDL_SetRenderDrawColor(renderer, particle.color.r, particle.color.g, particle.color.b, 255 * particle.lifespan / PARTICLE_LIFESPAN);
             SDL_RenderFillRect(renderer, &rect);
         }
 
